@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  techStack   String[] @map("tech_stack")
+  tags        String[]
+  embedding   Unsupported("vector(1024)")?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([tags], type: Gist)
+  @@map("projects")
+}
+
+model Mentor {
+  id        String   @id @default(cuid())
+  name      String
+  title     String
+  expertise String[]
+  bio       String
+  capacity  Int      @default(3)
+  tags      String[]
+  embedding Unsupported("vector(1024)")?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tags], type: Gist)
+  @@map("mentors")
+}
+
+model Resource {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  source    String
+  tags      String[]
+  chunkIndex Int     @default(0) @map("chunk_index")
+  embedding Unsupported("vector(1024)")?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([chunkIndex])
+  @@map("resources")
+}
