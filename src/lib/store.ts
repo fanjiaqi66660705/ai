@@ -99,9 +99,9 @@ export const store = {
     await initSeeds();
     return mentors;
   },
-  async createMentor(data: Omit<Mentor, "embedding" | "tags">): Promise<Mentor> {
+  async createMentor(data: Omit<Mentor, "id" | "embedding" | "tags">): Promise<Mentor> {
     const embedding = await embed(`${data.name} ${data.title} ${data.expertise.join(" ")} ${data.bio}`);
-    const m: Mentor = { ...data, tags: [...data.expertise], embedding };
+    const m: Mentor = { ...data, id: "m" + Date.now(), tags: [...data.expertise], embedding };
     mentors.unshift(m);
     return m;
   },

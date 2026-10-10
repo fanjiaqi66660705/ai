@@ -83,7 +83,7 @@ interface Candidate {
 async function runMatch(
   queryEmbedding: number[],
   queryTags: string[],
-  list: Candidate[],
+  list: unknown[],
   pick: (c: any) => Candidate,
 ): Promise<MatchResult[]> {
   const candidates = list.map(pick);
