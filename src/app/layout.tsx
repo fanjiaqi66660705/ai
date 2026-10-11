@@ -11,7 +11,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN" className="h-full">
-      <body className="min-h-full bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+      <body className="min-h-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 text-zinc-900 antialiased dark:from-zinc-950 dark:via-zinc-950 dark:to-indigo-950/50 dark:text-zinc-100">
         {children}
       </body>
     </html>
