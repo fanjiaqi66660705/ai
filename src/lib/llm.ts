@@ -1,12 +1,29 @@
-import OpenAI from "openai";
+// 大模型调用层（浏览器端可运行）
+// - 未配置 Key 时使用本地 mock，保证静态部署可零配置演示
+// - 可在浏览器 localStorage 写入 llm_api_key（及可选 llm_base_url）启用真实模型
+//   例如在控制台执行：localStorage.setItem("llm_api_key", "你的Key")
+// - 本地 dev 也支持服务端环境变量 LLM_API_KEY / LLM_BASE_URL
 
-const apiKey = process.env.LLM_API_KEY;
-const baseURL = process.env.LLM_BASE_URL;
-const model = process.env.LLM_MODEL || "glm-4-flash";
+const DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/paas/v4";
+const model = "glm-4-flash";
 
-const client = apiKey
-  ? new OpenAI({ apiKey, baseURL })
-  : null;
+interface RuntimeConfig {
+  key?: string;
+  base: string;
+}
+
+function getConfig(): RuntimeConfig {
+  if (typeof window !== "undefined") {
+    return {
+      key: window.localStorage.getItem("llm_api_key") ?? undefined,
+      base: window.localStorage.getItem("llm_base_url") ?? DEFAULT_BASE_URL,
+    };
+  }
+  return {
+    key: process.env.LLM_API_KEY,
+    base: process.env.LLM_BASE_URL ?? DEFAULT_BASE_URL,
+  };
+}
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -14,23 +31,34 @@ export interface ChatMessage {
 }
 
 /**
- * 调用大模型聊天接口。
- * 未配置 API Key 时返回 mock 内容，保证开发阶段可演示。
+ * 调用大模型聊天接口（OpenAI 兼容协议，原生 fetch，无 SDK 依赖）。
+ * 未配置 API Key 或调用失败时返回 mock 内容，保证演示不中断。
  */
 export async function chat(
   messages: ChatMessage[],
   opts: { temperature?: number; json?: boolean } = {},
 ): Promise<string> {
-  if (!client) {
+  const { key, base } = getConfig();
+  if (!key) return mockChat(messages);
+  try {
+    const res = await fetch(`${base}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: opts.temperature ?? 0.3,
+        ...(opts.json ? { response_format: { type: "json_object" } } : {}),
+      }),
+    });
+    if (!res.ok) throw new Error(`LLM HTTP ${res.status}`);
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error("LLM 空响应");
+    return String(content);
+  } catch {
     return mockChat(messages);
   }
-  const res = await client.chat.completions.create({
-    model,
-    messages,
-    temperature: opts.temperature ?? 0.3,
-    response_format: opts.json ? { type: "json_object" } : undefined,
-  });
-  return res.choices[0]?.message.content ?? "";
 }
 
 function mockChat(messages: ChatMessage[]): string {

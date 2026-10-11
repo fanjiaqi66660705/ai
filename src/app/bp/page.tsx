@@ -5,6 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { RadarChart } from "@/components/radar-chart";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Flame, User, FileCheck2, Gavel } from "lucide-react";
+import { clientApi } from "@/lib/client-api";
 
 interface JudgeMsg {
   role: "judge" | "me";
@@ -40,12 +41,7 @@ export default function BpPage() {
     setLoading("start");
     setReport(null);
     setMessages([]);
-    const res = await fetch("/api/bp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: bpTitle.trim(), bpText: bpText.trim() }),
-    });
-    const data = await res.json();
+    const data = await clientApi.bpStart(bpTitle.trim(), bpText.trim());
     setLoading("");
     setSession({ id: data.sessionId, round: data.round, dimension: data.dimension });
     setMessages([
@@ -62,12 +58,7 @@ export default function BpPage() {
     setInput("");
     setLoading("answer");
 
-    const res = await fetch(`/api/bp/${session.id}/answer`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answer, question: lastQuestion }),
-    });
-    const data = await res.json();
+    const data = await clientApi.bpAnswer(session.id, answer, lastQuestion);
     setLoading("");
 
     if (data.done) {
@@ -88,10 +79,14 @@ export default function BpPage() {
 
   async function genReport(id: string) {
     setLoading("report");
-    const res = await fetch(`/api/bp/${id}/report`, { method: "POST" });
-    const data = await res.json();
-    setLoading("");
-    if (!data.error) setReport(data);
+    try {
+      const data = await clientApi.bpReport(id);
+      setReport(data);
+    } catch {
+      setReport(null);
+    } finally {
+      setLoading("");
+    }
   }
 
   const questioning = session && !report && loading !== "report";

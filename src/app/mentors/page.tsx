@@ -6,6 +6,7 @@ import { MatchCard } from "@/components/match-card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles } from "lucide-react";
 import type { MatchResult } from "@/lib/matching";
+import { clientApi } from "@/lib/client-api";
 
 interface MentorItem {
   id: string;
@@ -30,8 +31,7 @@ export default function MentorsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/mentors");
-    setMentors(await res.json());
+    setMentors(await clientApi.listMentors());
   }, []);
 
   useEffect(() => {
@@ -42,23 +42,19 @@ export default function MentorsPage() {
     setSelected(mentor);
     setMatching(true);
     setMatches([]);
-    const res = await fetch(`/api/mentors/${mentor.id}/match`);
-    setMatches(await res.json());
+    const matches = await clientApi.matchMentor(mentor.id);
+    setMatches(matches);
     setMatching(false);
   }
 
   async function submitMentor() {
     if (!name.trim() || !mTitle.trim()) return;
     setSubmitting(true);
-    await fetch("/api/mentors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name.trim(),
-        title: mTitle.trim(),
-        expertise: expertise.split(/[,，\s]+/).filter(Boolean),
-        bio: bio.trim(),
-      }),
+    await clientApi.createMentor({
+      name: name.trim(),
+      title: mTitle.trim(),
+      expertise: expertise.split(/[,，\s]+/).filter(Boolean),
+      bio: bio.trim(),
     });
     setSubmitting(false);
     setShowForm(false);

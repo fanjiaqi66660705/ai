@@ -6,6 +6,7 @@ import { MatchCard } from "@/components/match-card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, X } from "lucide-react";
 import type { MatchResult } from "@/lib/matching";
+import { clientApi } from "@/lib/client-api";
 
 interface ProjectItem {
   id: string;
@@ -28,23 +29,17 @@ export default function ProjectsPage() {
   const [techStack, setTechStack] = useState("");
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/projects");
-    setProjects(await res.json());
+    setProjects(await clientApi.listProjects());
   }, []);
 
   async function submitProject() {
     if (!title.trim() || !description.trim()) return;
     setSubmitting(true);
-    const res = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: title.trim(),
-        description: description.trim(),
-        techStack: techStack.split(/[,，\s]+/).filter(Boolean),
-      }),
+    const project = await clientApi.createProject({
+      title: title.trim(),
+      description: description.trim(),
+      techStack: techStack.split(/[,，\s]+/).filter(Boolean),
     });
-    const project = await res.json();
     setSubmitting(false);
     setShowForm(false);
     setTitle("");
@@ -58,8 +53,8 @@ export default function ProjectsPage() {
     setSelected(project);
     setMatching(true);
     setMatches([]);
-    const res = await fetch(`/api/projects/${project.id}/match`);
-    setMatches(await res.json());
+    const matches = await clientApi.matchProject(project.id);
+    setMatches(matches);
     setMatching(false);
   }
 

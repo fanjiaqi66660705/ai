@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, BookOpen, ExternalLink } from "lucide-react";
+import { clientApi } from "@/lib/client-api";
 
 interface Source {
   id: string;
@@ -45,17 +46,15 @@ export default function AssistantPage() {
     setInput("");
     setLoading(true);
 
-    const res = await fetch("/api/assistant", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (data.error) {
-      setItems((prev) => [...prev, { role: "ai", text: data.error }]);
+    let data: { answer: string; sources: Source[] };
+    try {
+      data = await clientApi.askAssistant(query);
+    } catch {
+      setLoading(false);
+      setItems((prev) => [...prev, { role: "ai", text: "检索失败，请稍后重试。" }]);
       return;
     }
+    setLoading(false);
     setItems((prev) => [
       ...prev,
       { role: "ai", text: data.answer, sources: data.sources },
