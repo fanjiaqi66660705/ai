@@ -61,14 +61,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors",
                       active
                         ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
                         : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800",
                     )}
                   >
-                    <Icon className="h-4 w-4" />
-                    {label}
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{label}</span>
                   </Link>
                 );
               })}
@@ -78,8 +78,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* 桌面端侧边栏 */}
-      <aside className="hidden w-56 shrink-0 border-r border-zinc-200 bg-white p-4 md:block dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mb-8 px-2">
+      <aside className="hidden w-40 shrink-0 border-r border-zinc-200 bg-white p-3 md:block dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mb-8 px-1">
           <h1 className="text-sm font-bold leading-tight">AI 科创孵化</h1>
           <p className="text-xs text-zinc-500">全生命周期工作台</p>
         </div>
@@ -91,14 +91,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors",
                   active
                     ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
                     : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800",
                 )}
               >
-                <Icon className="h-4 w-4" />
-                {label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="truncate">{label}</span>
               </Link>
             );
           })}
