@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* 主内容区：移动端留出顶部栏高度，桌面端正常内边距 */}
-      <main className="flex-1 overflow-y-auto p-4 pt-18 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 pt-16 md:p-8 md:pt-8">
         {children}
       </main>
     </div>
